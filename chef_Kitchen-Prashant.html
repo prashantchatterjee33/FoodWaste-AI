@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Display System (KDS) - FoodWaste AI</title>
+     <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="Dashboard.css">
+    <style>
+        .kds-container {
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .kds-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            background: #ffffff;
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .kds-header h1 {
+            font-size: 24px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .kds-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        .order-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px -2px rgba(0,0,0,0.1);
+        }
+        .order-card-header {
+            background: #f8fafc;
+            padding: 14px 18px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .order-id {
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 16px;
+        }
+        .order-time {
+            font-size: 13px;
+            color: #64748b;
+        }
+        .order-body {
+            padding: 16px 18px;
+            flex-grow: 1;
+        }
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .item-list li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #334155;
+        }
+        .item-list li:last-child {
+            border-bottom: none;
+        }
+        .item-qty {
+            font-weight: 600;
+            background: #e2e8f0;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .order-footer {
+            padding: 14px 18px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+        }
+        .btn-kds {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .btn-prepare {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-prepare:hover { background: #2563eb; }
+        .btn-ready {
+            background: #10b981;
+            color: white;
+        }
+        .btn-ready:hover { background: #059669; }
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-preparing { background: #e0f2fe; color: #0284c7; }
+    </style>
+</head>
+<body>
+        <!-- Sidebar Navigation -->
+        <!-- Mobile Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- App Container -->
+    <div class="app-container">
+
+        <!-- LEFT SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="Dashboard.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; width: 100%;">
+                    <div class="brand-logo">
+                        <i class="fa-solid fa-seedling"></i>
+                    </div>
+                    <div class="brand-title">
+                        <h2>FoodWaste AI</h2>
+                        <span>Smart Analytics</span>
+                    </div>
+                </a>
+                <button class="mobile-close-btn" id="mobileCloseBtn">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="Dashboard.html" class="nav-item" data-page="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="order.html" class="nav-item">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span>Place Order (POS)</span>
+                </a>
+                <a href="chef_kitchen.html" class="nav-item active">
+                    <i class="fa-solid fa-fire-burner"></i>
+                    <span>Kitchen Display (KDS)</span>
+                </a>
+                 <a href="Daily_data.html" class="nav-item" data-page="add-data">
+                  <i class="fa-solid fa-circle-plus"></i>
+                  <span>Add Daily Data</span>
+              </a>
+                <a href="Food_records.html" class="nav-item" data-page="food-records">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <span>Food Records</span>
+                </a>
+                <a href="Prediction.html" class="nav-item" data-page="predictions">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>Predictions</span>
+                </a>
+                <a href="recommendations.html" class="nav-item" data-page="recommendations">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <span>Recommendations</span>
+                </a>
+                <a href="Analytics.html" class="nav-item" data-page="analytics">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="reports.html" class="nav-item" data-page="reports">
+                    <i class="fa-solid fa-file-arrow-down"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="settings.html" class="nav-item" data-page="settings">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="billing.html" class="nav-item" data-page="billing">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <span>Billing & Invoice</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="admin-profile">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUy-t00mImJn20OoJQGOZ-hpNBUnrKty6pmaC96C6r_Q&s=10?auto=format&fit=crop&q=80&w=150" alt="Admin Avatar" class="admin-avatar">
+                    <div class="admin-info">
+                        <h4 id="sidebarAdminName">Admin</h4>
+                    </div>
+                </div>
+                <button class="logout-btn" id="logoutBtn" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content" style="flex: 1; background: #f1f5f9; min-height: 100vh;">
+            <div class="kds-container">
+                
+                <!-- Header Section -->
+                <div class="kds-header">
+                    <h1><i class="fa-solid fa-fire-burner" style="color: #10b981;"></i> Kitchen Display System (KDS)</h1>
+                    <div class="kds-actions">
+                        <span class="badge-status status-preparing"><i class="fa-solid fa-clock"></i> Live Orders Active</span>
+                    </div>
+                </div>
+
+                <!-- Orders Grid (Live Data Injected Here) -->
+                <div class="kds-grid" id="kdsOrdersContainer">
+                    <p style="grid-column: 1 / -1; text-align: center; color: #64748b; padding: 40px;">Loading live kitchen orders...</p>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- KDS Script -->
+    <script src="chef_kitchen.js"></script>
+</body>
+</html>

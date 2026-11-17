@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Place Order - FoodWaste AI (POS)</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Dashboard Stylesheet -->
+    <link rel="stylesheet" href="Dashboard.css">
+</head>
+<body class="dashboard-body">
+
+    <div class="dashboard-container" style="display: flex; width: 100%; min-height: 100vh;">
+        
+        <!-- Mobile Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="Dashboard.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; width: 100%;">
+                    <div class="brand-logo">
+                        <i class="fa-solid fa-seedling"></i>
+                    </div>
+                    <div class="brand-title">
+                        <h2>FoodWaste AI</h2>
+                        <span>Smart Analytics</span>
+                    </div>
+                </a>
+                <button class="mobile-close-btn" id="mobileCloseBtn">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+             <nav class="sidebar-nav">
+    <a href="Dashboard.html" class="nav-item" data-page="dashboard">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>Dashboard</span>
+    </a>
+    
+    <!-- Naye Added Links -->
+    <a href="order.html" class="nav-item active">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span>Place Order (POS)</span>
+    </a>
+    <a href="chef_kitchen.html" class="nav-item">
+        <i class="fa-solid fa-fire-burner"></i>
+        <span>Kitchen Display (KDS)</span>
+    </a>
+
+    <a href="Daily_data.html" class="nav-item" data-page="add-data">
+        <i class="fa-solid fa-circle-plus"></i>
+        <span>Add Daily Data</span>
+    </a>
+    <a href="Food_records.html" class="nav-item" data-page="food-records">
+        <i class="fa-solid fa-clipboard-list"></i>
+        <span>Food Records</span>
+    </a>
+    <a href="Prediction.html" class="nav-item" data-page="predictions">
+        <i class="fa-solid fa-brain"></i>
+        <span>Predictions</span>
+    </a>
+    <a href="recommendations.html" class="nav-item" data-page="recommendations">
+        <i class="fa-solid fa-lightbulb"></i>
+        <span>Recommendations</span>
+    </a>
+    <a href="Analytics.html" class="nav-item" data-page="analytics">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Analytics</span>
+    </a>
+    <a href="reports.html" class="nav-item" data-page="reports">
+        <i class="fa-solid fa-file-arrow-down"></i>
+        <span>Reports</span>
+    </a>
+    <a href="settings.html" class="nav-item" data-page="settings">
+        <i class="fa-solid fa-gear"></i>
+        <span>Settings</span>
+    </a>
+       <a href="billing.html" class="nav-item" data-page="billing">
+        <i class="fa-solid fa-gear"></i>
+        <span>Billing & Invoice</span>
+    </a>
+</nav>
+
+            <div class="sidebar-footer">
+                <div class="admin-profile">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUy-t00mImJn20OoJQGOZ-hpNBUnrKty6pmaC96C6r_Q&s=10?auto=format&fit=crop&q=80&w=150" alt="Admin Avatar" class="admin-avatar">
+                    <div class="admin-info">
+                        <h4 id="sidebarAdminName">---</h4>
+                    </div>
+                </div>
+                <button class="logout-btn" id="logoutBtn" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content" style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
+            <!-- Top Header Bar -->
+            <header class="top-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: white; border-bottom: 1px solid #e2e8f0;">
+                <div class="header-left" style="display: flex; align-items: center; gap: 15px;">
+                    <button class="menu-toggle-btn" id="menuToggleBtn" style="background: none; border: none; font-size: 18px; cursor: pointer; color: #475569;"><i class="fa-solid fa-bars"></i></button>
+                    <h2 style="font-size: 20px; margin: 0; color: #1e293b;">Waiter POS - Live Order Management</h2>
+                </div>
+                <div class="header-right" style="display: flex; align-items: center; gap: 15px;">
+                    <div class="date-display" id="currentDateDisplay" style="font-size: 13px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 6px 12px; border-radius: 6px;">
+                        <i class="fa-regular fa-calendar" style="margin-right: 6px; color: #10b981;"></i>Loading Date...
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Body -->
+            <div class="content-body" style="padding: 25px; background: #f8fafc; flex: 1; display: grid; grid-template-columns: 2fr 1fr; gap: 25px;">
+                
+                <!-- Left: Available Menu Dishes Grid -->
+                <div class="menu-section">
+                    <div class="card-header-flex" style="margin-bottom: 15px;">
+                        <h3 style="font-size: 16px; color: #1e293b; margin: 0;"><i class="fa-solid fa-utensils text-success"></i> Select Menu Items</h3>
+                        <span style="font-size: 12px; color: #64748b;" id="menuCount">Loading menu...</span>
+                    </div>
+                    <div id="menuDishesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+                        <!-- Dynamic Menu Cards Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Right: Active Order Cart & Placement Form -->
+                <div class="cart-section card" style="background: white; padding: 20px; border-radius: 12px; height: fit-content; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                    <h3 style="font-size: 16px; color: #1e293b; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+                        <i class="fa-solid fa-receipt text-primary"></i> Current Order Cart
+                    </h3>
+
+                    <form id="orderForm">
+                        <div style="margin-bottom: 15px;">
+                            <label style="display:block; margin-bottom:5px; font-size:13px; font-weight:600; color:#475569;">Table Number / Customer Name</label>
+                            <input type="text" id="tableNumber" placeholder="e.g. Table 4 / John Doe" style="width:100%; padding:9px; border:1px solid #cbd5e1; border-radius:6px; outline:none; font-size:13px;" required>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <label style="display:block; margin-bottom:5px; font-size:13px; font-weight:600; color:#475569;">Selected Items</label>
+                            <div id="cartItemsList" style="max-height: 180px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; background: #f8fafc; margin-bottom: 10px;">
+                                <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 10px 0;">No items selected yet.</p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-weight: 700; font-size: 14px; color: #1e293b;">
+                            <span>Total Portions / Containers:</span>
+                            <span id="cartTotalQty">0</span>
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="placeOrderBtn" style="width:100%; padding:12px; background:#10b981; color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;" disabled>
+                            <i class="fa-solid fa-paper-plane"></i> Place Order to Kitchen
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Order POS Script -->
+    <script src="order.js"></script>
+</body>
+</html>

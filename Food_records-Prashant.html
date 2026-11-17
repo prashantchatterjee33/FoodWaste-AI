@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Food Records - FoodWaste AI</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="Dashboard.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        
+        <!-- SIDEBAR OVERLAY FOR MOBILE -->
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+        <!-- SIDEBAR NAVIGATION -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+    <a href="Dashboard.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; width: 100%;">
+        <div class="brand-logo">
+            <i class="fa-solid fa-seedling"></i>
+        </div>
+        <div class="brand-title">
+            <h2>FoodWaste AI</h2>
+            <span>Smart Analytics</span>
+        </div>
+    </a>
+    <button class="mobile-close-btn" id="mobileCloseBtn">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+</div>
+
+           <nav class="sidebar-nav">
+    <a href="Dashboard.html" class="nav-item" data-page="dashboard">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>Dashboard</span>
+    </a>
+    
+    <!-- Naye Added Links -->
+    <a href="order.html" class="nav-item">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span>Place Order (POS)</span>
+    </a>
+    <a href="chef_kitchen.html" class="nav-item">
+        <i class="fa-solid fa-fire-burner"></i>
+        <span>Kitchen Display (KDS)</span>
+    </a>
+
+    <a href="Daily_data.html" class="nav-item" data-page="add-data">
+        <i class="fa-solid fa-circle-plus"></i>
+        <span>Add Daily Data</span>
+    </a>
+    <a href="Food_records.html" class="nav-item active" data-page="food-records">
+        <i class="fa-solid fa-clipboard-list"></i>
+        <span>Food Records</span>
+    </a>
+    <a href="Prediction.html" class="nav-item" data-page="predictions">
+        <i class="fa-solid fa-brain"></i>
+        <span>Predictions</span>
+    </a>
+    <a href="recommendations.html" class="nav-item" data-page="recommendations">
+        <i class="fa-solid fa-lightbulb"></i>
+        <span>Recommendations</span>
+    </a>
+    <a href="Analytics.html" class="nav-item" data-page="analytics">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Analytics</span>
+    </a>
+    <a href="reports.html" class="nav-item" data-page="reports">
+        <i class="fa-solid fa-file-arrow-down"></i>
+        <span>Reports</span>
+    </a>
+    <a href="settings.html" class="nav-item" data-page="settings">
+        <i class="fa-solid fa-gear"></i>
+        <span>Settings</span>
+    </a>
+       <a href="billing.html" class="nav-item" data-page="billing">
+        <i class="fa-solid fa-gear"></i>
+        <span>Billing & Invoice</span>
+    </a>
+</nav>
+
+            <div class="sidebar-footer">
+                <div class="admin-profile">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUy-t00mImJn20OoJQGOZ-hpNBUnrKty6pmaC96C6r_Q&s=10?auto=format&fit=crop&q=80&w=150" alt="Admin Avatar" class="admin-avatar">
+                    <div class="admin-info">
+                        <h4 id="sidebarAdminName">---</h4>
+                    </div>
+                </div>
+                <button class="logout-btn" id="logoutBtn" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT WRAPPER -->
+        <div class="main-content">
+            
+            <!-- TOP HEADER -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button id="sidebarToggle" class="sidebar-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+                    <h2>Historical Food Records</h2>
+                </div>
+                <div class="header-right" style="display: flex; align-items: center; gap: 15px;">
+                    <div class="date-display" id="currentDateDisplay" style="font-size: 13px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 6px 12px; border-radius: 6px;">
+                        <i class="fa-regular fa-calendar" style="margin-right: 6px; color: #10b981;"></i>Loading Date...
+                    </div>
+                    <a href="Daily_data.html" class="btn-primary" style="background: #10b981; color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">
+                        <i class="fa-solid fa-plus"></i> Add New Record
+                    </a>
+                </div>
+            </header>
+
+            <!-- PAGE CONTENT AREA -->
+            <main class="content-body" style="padding: 20px;">
+                
+                <div class="card" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0; font-size: 18px; color: #1e293b;">All Recorded Entries from Database</h3>
+                        <span id="recordCount" style="font-size: 14px; color: #64748b;">Loading records...</span>
+                    </div>
+
+                    <!-- Responsive Table Container -->
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #e2e8f0; color: #475569;">
+                                    <th style="padding: 12px;">Date</th>
+                                    <th style="padding: 12px;">Day</th>
+                                    <th style="padding: 12px;">Customers</th>
+                                    <th style="padding: 12px;">Prepared</th>
+                                    <th style="padding: 12px;">Consumed</th>
+                                    <th style="padding: 12px;">Wasted</th>
+                                    <th style="padding: 12px;">Waste %</th>
+                                    <th style="padding: 12px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allFoodRecordsBody">
+                                <!-- Data rows will be injected dynamically via JavaScript -->
+                                <tr>
+                                    <td colspan="8" style="text-align: center; padding: 20px; color: #94a3b8;">Connecting to Supabase...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Script to set current date & mobile sidebar triggers -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set Current Date in Top Header
+            const dateDisplay = document.getElementById('currentDateDisplay');
+            if (dateDisplay) {
+                const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+                const todayStr = new Date().toLocaleDateString('en-US', options);
+                dateDisplay.innerHTML = `<i class="fa-regular fa-calendar" style="margin-right: 6px; color: #10b981;"></i>${todayStr}`;
+            }
+
+            // Mobile Sidebar Toggle
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebarClose = document.getElementById('sidebarClose');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+            if (sidebarToggle && sidebar && sidebarOverlay) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.add('show');
+                    sidebarOverlay.classList.add('show');
+                });
+            }
+
+            const closeSidebarMenu = () => {
+                if (sidebar) sidebar.classList.remove('show');
+                if (sidebarOverlay) sidebarOverlay.classList.remove('show');
+            };
+
+            if (sidebarClose) sidebarClose.addEventListener('click', closeSidebarMenu);
+            if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebarMenu);
+        });
+    </script>
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Page Logic Script -->
+    <script src="food_records.js"></script>
+</body>
+</html>
