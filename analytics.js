@@ -22,7 +22,6 @@ async function checkAuthGuard() {
     try {
         const { data: { session }, error } = await supabaseClient.auth.getSession();
 
-        // Agar session na mile ya error aaye, toh login page par bhej do
         if (error || !session) {
             console.warn("Unauthorized access detected. Redirecting to login...");
             window.location.href = "login.html";
@@ -50,24 +49,22 @@ let analyticsComparisonChartInstance = null;
 let analyticsDistributionChartInstance = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Sabse pehle Authentication check run karo
     await checkAuthGuard();
 
-    // Initialize Navigation & Common UI
     initSidebarNavigation();
     initMobileMenu();
     initNotifications();
     loadLoggedInUserProfile();
 
-    // Fetch live analytics data from Supabase with fallbacks
     fetchAnalyticsDataFromSupabase();
 });
 
 /* ==========================================================================
-   Supabase Data Fetching for Analytics
+   Supabase Data Fetching for Analytics (food_records + order_history)
    ========================================================================== */
 async function fetchAnalyticsDataFromSupabase() {
     let recordsToUse = [];
+    let settledOrders = [];
 
     if (supabaseClient) {
         try {
@@ -75,67 +72,97 @@ async function fetchAnalyticsDataFromSupabase() {
                 .from('food_records')
                 .select('*')
                 .order('record_date', { ascending: false })
-                .limit(30); // Last 30 records for deep analytics
+                .limit(30);
 
-            if (!error && records && records.length > 0) {
+            if (!error && Array.isArray(records)) {
                 recordsToUse = records;
             }
         } catch (err) {
-            console.warn('Supabase analytics fetch error:', err.message);
+            console.warn('Supabase food_records fetch error:', err.message);
+        }
+
+        try {
+            const { data: historyRows, error: historyError } = await supabaseClient
+                .from('order_history')
+                .select('*')
+                .order('settled_at', { ascending: false })
+                .limit(100);
+
+            if (!historyError && Array.isArray(historyRows)) {
+                settledOrders = historyRows;
+            }
+        } catch (err) {
+            console.warn('Supabase order_history fetch error:', err.message);
         }
     }
 
-    // Update Metric Cards & Render Charts with Live/Fallback Data
-    updateAnalyticsMetrics(recordsToUse);
+    updateAnalyticsMetrics(recordsToUse, settledOrders);
     initAnalyticsCharts(recordsToUse);
 }
 
 /* ==========================================================================
-   Advanced Metric Cards Update (Units updated to Containers)
+   Advanced Metric Cards Update (Units: Containers & Settled History)
    ========================================================================== */
-function updateAnalyticsMetrics(records) {
-    if (!records || records.length === 0) return;
-
+function updateAnalyticsMetrics(records, settledOrders = []) {
     let totalWaste = 0;
     let totalPrepared = 0;
     let totalCustomers = 0;
 
-    records.forEach(r => {
-        // Supporting both column name conventions (food_wasted or wasted, food_prepared or prepared)
-        totalWaste += parseFloat(r.food_wasted || r.wasted || (r.food_prepared ? r.food_prepared * 0.15 : 0)) || 0;
-        totalPrepared += parseFloat(r.food_prepared || r.prepared || 0);
-        totalCustomers += parseInt(r.customers || 0);
-    });
+    if (Array.isArray(records) && records.length > 0) {
+        records.forEach(r => {
+            totalWaste += parseFloat(r.food_wasted || r.wasted || 0) || 0;
+            totalPrepared += parseFloat(r.food_prepared || r.prepared || 0) || 0;
+            totalCustomers += parseInt(r.customers || 0, 10) || 0;
+        });
+    }
 
     const avgWastePercentage = totalPrepared > 0 ? ((totalWaste / totalPrepared) * 100).toFixed(1) : '0.0';
-    const avgCustomers = Math.round(totalCustomers / records.length);
+    const avgCustomers = records.length > 0 ? Math.round(totalCustomers / records.length) : 0;
 
-    // DOM Elements update
+    const settledQtySum = settledOrders.reduce((acc, row) => acc + (Number(row.total_qty) || 0), 0);
+    const settledRevenueSum = settledOrders.reduce((acc, row) => acc + (Number(row.total_amount) || 0), 0);
+    const displayAvgCustomers = avgCustomers > 0 ? avgCustomers : (settledOrders.length > 0 ? settledOrders.length : 0);
+
     const elTotalWaste = document.getElementById('analyticsTotalWaste');
     const elAvgWastePercent = document.getElementById('analyticsAvgWastePercent');
     const elTotalPrepared = document.getElementById('analyticsTotalPrepared');
     const elAvgCustomers = document.getElementById('analyticsAvgCustomers');
+    const elSettledRevenue = document.getElementById('analyticsSettledRevenue');
 
     if (elTotalWaste) elTotalWaste.innerText = `${totalWaste.toFixed(1)} Containers`;
     if (elAvgWastePercent) elAvgWastePercent.innerText = `${avgWastePercentage}%`;
     if (elTotalPrepared) elTotalPrepared.innerText = `${totalPrepared.toFixed(1)} Containers`;
-    if (elAvgCustomers) elAvgCustomers.innerText = avgCustomers;
+    if (elAvgCustomers) {
+        elAvgCustomers.innerText = settledQtySum > 0
+            ? `${displayAvgCustomers} (${settledQtySum} items billed)`
+            : `${displayAvgCustomers}`;
+    }
+    if (elSettledRevenue) {
+        elSettledRevenue.innerText = `₹${settledRevenueSum} (${settledOrders.length})`;
+    }
 }
 
 /* ==========================================================================
-   Chart.js Advanced Analytics Render Functions (Units updated to Containers)
+   Chart.js Advanced Analytics Render Functions
    ========================================================================== */
 function initAnalyticsCharts(records = []) {
-    // Fallback data agar records kam ho ya na ho
-    const fallbackLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const fallbackWaste = [19, 13, 25, 12, 18, 15, 15];
-    const fallbackPrepared = [115, 125, 140, 120, 110, 155, 150];
-    const fallbackConsumed = [96, 112, 115, 104, 98, 138, 140];
+    const hasRecords = Array.isArray(records) && records.length > 0;
 
-    const labels = records.length ? records.map(r => r.day_of_week || r.record_date).reverse() : fallbackLabels;
-    const wasteData = records.length ? records.map(r => parseFloat(r.food_wasted || r.wasted || (r.food_prepared ? r.food_prepared * 0.15 : 0))).reverse() : fallbackWaste;
-    const preparedData = records.length ? records.map(r => parseFloat(r.food_prepared || r.prepared || 0)).reverse() : fallbackPrepared;
-    const consumedData = records.length ? records.map(r => parseFloat(r.food_consumed || (r.customers ? r.customers * 1.2 : 0))).reverse() : fallbackConsumed;
+    const labels = hasRecords
+        ? records.map(r => r.day_of_week || r.record_date).reverse()
+        : ['No Data'];
+
+    const wasteData = hasRecords
+        ? records.map(r => parseFloat(r.food_wasted || r.wasted || 0) || 0).reverse()
+        : [0];
+
+    const preparedData = hasRecords
+        ? records.map(r => parseFloat(r.food_prepared || r.prepared || 0) || 0).reverse()
+        : [0];
+
+    const consumedData = hasRecords
+        ? records.map(r => parseFloat(r.food_consumed || 0) || 0).reverse()
+        : [0];
 
     // 1. Waste Trend Line Chart
     const trendCanvas = document.getElementById('analyticsTrendChart');
@@ -160,8 +187,8 @@ function initAnalyticsCharts(records = []) {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { 
-                        beginAtZero: true, 
+                    y: {
+                        beginAtZero: true,
                         grid: { color: '#f1f5f9' },
                         title: { display: true, text: 'Containers' }
                     },
@@ -189,8 +216,8 @@ function initAnalyticsCharts(records = []) {
                 maintainAspectRatio: false,
                 plugins: { legend: { position: 'bottom' } },
                 scales: {
-                    y: { 
-                        beginAtZero: true, 
+                    y: {
+                        beginAtZero: true,
                         grid: { color: '#f1f5f9' },
                         title: { display: true, text: 'Containers' }
                     },
@@ -204,12 +231,22 @@ function initAnalyticsCharts(records = []) {
     const distCanvas = document.getElementById('analyticsDistributionChart');
     if (distCanvas) {
         if (analyticsDistributionChartInstance) analyticsDistributionChartInstance.destroy();
+        const totalWasteVal = wasteData.reduce((a, b) => a + b, 0);
+        const distValues = totalWasteVal > 0
+            ? [
+                Number((totalWasteVal * 0.40).toFixed(1)),
+                Number((totalWasteVal * 0.25).toFixed(1)),
+                Number((totalWasteVal * 0.20).toFixed(1)),
+                Number((totalWasteVal * 0.15).toFixed(1))
+            ]
+            : [0, 0, 0, 0];
+
         analyticsDistributionChartInstance = new Chart(distCanvas.getContext('2d'), {
             type: 'doughnut',
             data: {
                 labels: ['Grains & Rice', 'Vegetables', 'Dairy', 'Prepared Dishes'],
                 datasets: [{
-                    data: [40, 25, 20, 15],
+                    data: distValues,
                     backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
                     borderWidth: 0
                 }]
@@ -228,11 +265,10 @@ function initAnalyticsCharts(records = []) {
    ========================================================================== */
 function initSidebarNavigation() {
     const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
-    
+
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             const pageName = item.getAttribute('data-page');
-            
             const href = item.getAttribute('href');
             if (href && href !== '#') {
                 return;
@@ -241,7 +277,7 @@ function initSidebarNavigation() {
             e.preventDefault();
             navItems.forEach(nav => nav.classList.remove('active'));
             item.classList.add('active');
-            
+
             const sidebar = document.getElementById('sidebar');
             const sidebarOverlay = document.getElementById('sidebarOverlay');
             if (sidebar) sidebar.classList.remove('active', 'show');
@@ -295,7 +331,7 @@ function initMobileMenu() {
     };
 
     overlay.addEventListener('click', closeSidebar);
-    sidebarClose?.addEventListener('click5', closeSidebar); // safe optional chaining fallback
+    sidebarClose?.addEventListener('click', closeSidebar);
 }
 
 function initNotifications() {
